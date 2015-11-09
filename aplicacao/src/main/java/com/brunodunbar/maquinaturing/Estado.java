@@ -6,7 +6,8 @@ import javafx.util.StringConverter;
 
 public class Estado {
 
-    public static final Estado INICIAL = new Estado("->");
+    public static final Estado INICIAL = new Estado("INICIAL");
+    public static final Estado FINAL = new Estado("FINAL");
 
     private static final StringConverter<Estado> CONVERTER = new EstadoStringConverter();
 

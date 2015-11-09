@@ -35,7 +35,7 @@ public class Fita extends ScrollPane {
         Celula primeiraCelula = celulas.get(0);
 
         primeiraCelula.setEditavel(false);
-        primeiraCelula.setValor("->");
+        primeiraCelula.setValor(">");
 
         selecionarCelula(primeiraCelula);
 

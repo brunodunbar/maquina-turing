@@ -1,10 +1,11 @@
 package com.brunodunbar.maquinaturing;
 
-import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
@@ -15,6 +16,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Objects;
@@ -45,19 +47,42 @@ public class MaquinaTuringController {
     private Spinner<Integer> uxQuantidadeEstados;
 
     private ObservableList<Comando> comandos = FXCollections.observableArrayList();
-    private ObservableList<Estado> estados = FXCollections.observableArrayList(Estado.INICIAL);
+    private ObservableList<Estado> estados = FXCollections.observableArrayList(Estado.INICIAL, Estado.FINAL);
+    private SpinnerValueFactory.IntegerSpinnerValueFactory spinnerValueFactory;
+    private FileChooser abrirFileChooser;
+    private FileChooser salvarFileChooser;
 
     @FXML
     public void initialize() {
         uxComandos.setItems(comandos);
 
         uxComandosEstado.setCellFactory(param -> new ComboBoxTableCell(Estado.stringConverter(), estados));
-        uxComandosLe.setCellFactory(param -> new CustomTextFieldTableCell());
-        uxComandosEscreve.setCellFactory(param -> new CustomTextFieldTableCell());
+        uxComandosLe.setCellFactory(CustomTextFieldTableCell.forTableColumn());
+        uxComandosLe.setOnEditCommit(
+                new EventHandler<TableColumn.CellEditEvent<Comando, String>>() {
+                    @Override
+                    public void handle(TableColumn.CellEditEvent<Comando, String> t) {
+                        t.getTableView().getItems().get(t.getTablePosition().getRow()).setLe(t.getNewValue());
+                    }
+                }
+        );
+
+
+        uxComandosEscreve.setCellFactory(CustomTextFieldTableCell.forTableColumn());
+        uxComandosEscreve.setOnEditCommit(
+                new EventHandler<TableColumn.CellEditEvent<Comando, String>>() {
+                    @Override
+                    public void handle(TableColumn.CellEditEvent<Comando, String> t) {
+                        t.getTableView().getItems().get(t.getTablePosition().getRow()).setEscreve(t.getNewValue());
+                    }
+                }
+        );
+
         uxComandosProximoEstado.setCellFactory(param -> new ComboBoxTableCell(Estado.stringConverter(), estados));
         uxComandosMove.setCellFactory(param -> new ComboBoxTableCell(Direcao.stringConverter(), Direcao.values()));
 
-        uxQuantidadeEstados.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(10, 1000, 10));
+        spinnerValueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(10, 1000, 10);
+        uxQuantidadeEstados.setValueFactory(spinnerValueFactory);
         uxQuantidadeEstados.valueProperty().addListener(observable -> {
             updateEstados();
         });
@@ -67,7 +92,7 @@ public class MaquinaTuringController {
 
     private void updateEstados() {
 
-        Integer value = uxQuantidadeEstados.getValue();
+        Integer value = uxQuantidadeEstados.getValue() + 2; // adiciona os dois estados fixos
         if (value == estados.size()) {
             return;
         }
@@ -85,9 +110,14 @@ public class MaquinaTuringController {
             }
         }
 
-        while (value >= estados.size()) {
-            estados.add(new Estado("Q" + estados.size()));
+        while (value > estados.size()) {
+            estados.add(new Estado("Q" + (estados.size() - 1)));
         }
+    }
+
+    private Estado buscaPorNome(String nome) {
+        return estados.stream().filter(estado -> Objects.equals(estado.getNome(), nome))
+                .findFirst().orElseGet(() -> null);
     }
 
     @FXML
@@ -100,38 +130,46 @@ public class MaquinaTuringController {
         comandos.addAll(new Comando());
     }
 
+    @FXML
     public void onSalvar(ActionEvent actionEvent) {
 
+        if (salvarFileChooser == null) {
+            salvarFileChooser = new FileChooser();
+            salvarFileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Json", "*.json"));
+            salvarFileChooser.setTitle("Salvar...");
+        }
 
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open Resource File");
-
-        File file = fileChooser.showSaveDialog(uxContent.getScene().getWindow());
+        File file = salvarFileChooser.showSaveDialog(uxContent.getScene().getWindow());
         if (file != null) {
 
-            try(JsonWriter writer = new JsonWriter(new FileWriter(file))) {
+            try (JsonWriter writer = new JsonWriter(new FileWriter(file))) {
 
                 writer.beginObject();
                 writer.name("quantidadeEstados").value(uxQuantidadeEstados.getValue());
 
                 writer.name("comandos");
                 writer.beginArray();
-                for(Comando comando: comandos) {
+                for (Comando comando : comandos) {
 
                     writer.beginObject();
 
-                    if(comando.getEstado() != null) {
+                    if (comando.getEstado() != null) {
                         writer.name("estado").value(comando.getEstado().toString());
                     }
 
-                    writer.name("le").value(comando.getLe());
-                    writer.name("escreve").value(comando.getEscreve());
-
-                    if(comando.getProximoEstado() != null) {
-                        writer.name("estado").value(comando.getProximoEstado().toString());
+                    if (comando.getLe() != null) {
+                        writer.name("le").value(comando.getLe());
                     }
 
-                    if(comando.getMove() != null) {
+                    if (comando.getEscreve() != null) {
+                        writer.name("escreve").value(comando.getEscreve());
+                    }
+
+                    if (comando.getProximoEstado() != null) {
+                        writer.name("proximoEstado").value(comando.getProximoEstado().toString());
+                    }
+
+                    if (comando.getMove() != null) {
                         writer.name("move").value(comando.getMove().toString());
                     }
 
@@ -148,6 +186,79 @@ public class MaquinaTuringController {
         }
     }
 
+    @FXML
     public void onAbrir(ActionEvent actionEvent) {
+
+        if (abrirFileChooser == null) {
+            abrirFileChooser = new FileChooser();
+            abrirFileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Json", "*.json"));
+            abrirFileChooser.setTitle("Abrir...");
+        }
+
+        File file = abrirFileChooser.showOpenDialog(uxContent.getScene().getWindow());
+
+        if (file != null && file.exists()) {
+            try (JsonReader reader = new JsonReader(new FileReader(file))) {
+
+                comandos.clear();
+
+                reader.beginObject();
+
+                while (reader.hasNext()) {
+
+                    switch (reader.nextName()) {
+                        case "quantidadeEstados":
+                            spinnerValueFactory.setValue(reader.nextInt());
+                            updateEstados();
+                            break;
+                        case "comandos":
+
+                            reader.beginArray();
+
+                            while (reader.hasNext()) {
+
+                                reader.beginObject();
+
+                                Comando comando = new Comando();
+
+                                while (reader.hasNext()) {
+                                    switch (reader.nextName()) {
+                                        case "estado":
+                                            comando.setEstado(buscaPorNome(reader.nextString()));
+                                            break;
+                                        case "le":
+                                            comando.setLe(reader.nextString());
+                                            break;
+                                        case "escreve":
+                                            comando.setEscreve(reader.nextString());
+                                            break;
+                                        case "proximoEstado":
+                                            comando.setProximoEstado(buscaPorNome(reader.nextString()));
+                                            break;
+                                        case "move":
+                                            comando.setMove(Direcao.valueOf(reader.nextString()));
+                                            break;
+                                        default:
+                                            reader.skipValue();
+                                    }
+                                }
+
+                                comandos.add(comando);
+
+                                reader.endObject();
+                            }
+                            reader.endArray();
+                            break;
+                        default:
+                            reader.skipValue();
+                    }
+                }
+
+                reader.endObject();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
