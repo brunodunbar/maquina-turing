@@ -13,6 +13,11 @@ public class Comando {
     private ObjectProperty<Estado> proximoEstado = new SimpleObjectProperty<>();
     private ObjectProperty<Direcao> move = new SimpleObjectProperty<>();
 
+    public Comando() {
+        estadoProperty().set(Estado.INICIAL);
+        moveProperty().set(Direcao.DIREITA);
+    }
+
     public Estado getEstado() {
         return estado.get();
     }

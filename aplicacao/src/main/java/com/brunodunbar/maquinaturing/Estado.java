@@ -37,6 +37,22 @@ public class Estado {
         return nome.get();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Estado estado = (Estado) o;
+
+        return !(nome != null ? !nome.equals(estado.nome) : estado.nome != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return nome != null ? nome.hashCode() : 0;
+    }
+
     private static class EstadoStringConverter extends StringConverter<Estado> {
 
         @Override

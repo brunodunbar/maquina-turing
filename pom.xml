@@ -11,22 +11,11 @@
 
     <modules>
         <module>aplicacao</module>
-        <module>componentes</module>
     </modules>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>com.brunodunbar</groupId>
-                <artifactId>maquina-turing-componentes</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <build>
         <plugins>

@@ -29,7 +29,6 @@
         <sourceTestOutputDir name="target\generated-test-sources\test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
-        <module name="maquina-turing-componentes" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>

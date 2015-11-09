@@ -14,7 +14,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Font;
 
-public class Celula extends BorderPane {
+class Celula extends BorderPane {
 
     private StringProperty valorProperty;
     private boolean editavel;
