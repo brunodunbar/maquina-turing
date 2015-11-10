@@ -17,11 +17,9 @@
             <menus>
                 <Menu mnemonicParsing="false" text="Arquivo">
                     <items>
-                        <MenuItem mnemonicParsing="false" text="Novo"/>
+                        <MenuItem mnemonicParsing="false" text="Novo" onAction="#onNovo"/>
                         <MenuItem mnemonicParsing="false" text="Abrir…" onAction="#onAbrir"/>
                         <MenuItem mnemonicParsing="false" text="Salvar..." onAction="#onSalvar"/>
-                        <SeparatorMenuItem mnemonicParsing="false"/>
-                        <MenuItem mnemonicParsing="false" text="Sair"/>
                     </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Inserir">

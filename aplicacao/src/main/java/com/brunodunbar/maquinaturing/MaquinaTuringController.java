@@ -136,7 +136,7 @@ public class MaquinaTuringController {
                     .findFirst();
 
             if (!comandoOptional.isPresent()) {
-                uxSaida.appendText("Sem comando para " + estadoAtual + ", valor " + valorAtual);
+                uxSaida.appendText("Sem comando para '" + estadoAtual + "', valor '" + valorAtual + "'\n");
                 break;
             }
 
@@ -289,6 +289,16 @@ public class MaquinaTuringController {
 
     public void onResetar(ActionEvent actionEvent) {
         estadoAtual = Estado.INICIAL;
+        uxFita.limpar();
+    }
+
+    public void onNovo(ActionEvent actionEvent) {
+        estadoAtual = Estado.INICIAL;
+        comandos.clear();
+
+        spinnerValueFactory.setValue(10);
+        updateEstados();
+
         uxFita.limpar();
     }
 }

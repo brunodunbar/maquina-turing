@@ -14,7 +14,9 @@ public class MaquinaTuring extends Application {
     public void start(Stage primaryStage) throws IOException {
         Parent root = FXMLLoader.load(getClass().getResource("/MaquinaTuring.fxml"));
         Scene scene = new Scene(root, 800, 500);
-        //scene.getStylesheets().add("app.css");
+
+        primaryStage.setMaximized(false);
+        primaryStage.setResizable(false);
 
         primaryStage.setScene(scene);
         primaryStage.setTitle("Maquina Turing");
