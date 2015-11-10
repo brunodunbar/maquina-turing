@@ -14,6 +14,8 @@ public class Fita extends ScrollPane {
 
     private Celula celulaSelecionada;
 
+    private int posicao = 0;
+
     public Fita() {
 
         getStylesheets().addAll("app.css");
@@ -50,5 +52,45 @@ public class Fita extends ScrollPane {
 
         celulaSelecionada = celula;
         celulaSelecionada.setSelecionada(true);
+    }
+
+    public void move(Direcao direcao) {
+        int novaPosicao = direcao == Direcao.DIREITA ? posicao + 1 : posicao - 1;
+
+        if (novaPosicao < 0 || novaPosicao >= celulas.size()) {
+            throw new IllegalStateException("Movimento inválido da cabeça de leitura para a posição " + novaPosicao);
+        }
+
+        Celula celula = celulas.get(novaPosicao);
+        selecionarCelula(celula);
+        posicao = novaPosicao;
+    }
+
+    public String le() {
+        if (celulaSelecionada == null || celulaSelecionada.getValor() == null) {
+            return "";
+        }
+
+        return celulaSelecionada.getValor();
+    }
+
+    public void escreve(String valor) {
+        if (celulaSelecionada == null) {
+            return;
+        }
+
+        celulaSelecionada.setValor(valor);
+    }
+
+    public void resetarPosicao() {
+        Celula celula = celulas.get(0);
+        selecionarCelula(celula);
+        posicao = 0;
+    }
+
+    public void limpar() {
+        celulas.stream().forEach(celula -> celula.setValor(""));
+        celulas.get(0).setValor(">");
+        resetarPosicao();
     }
 }

@@ -1,1 +1,1 @@
-{"quantidadeEstados":11,"comandos":[]}
+{"quantidadeEstados":10,"comandos":[{"estado":"INICIAL","le":">","escreve":">","proximoEstado":"Q1","move":"DIREITA"},{"estado":"Q1","le":"*","escreve":"","proximoEstado":"Q2","move":"DIREITA"},{"estado":"Q2","le":"*","escreve":"*","proximoEstado":"Q2","move":"DIREITA"},{"estado":"Q2","le":"","escreve":"*","proximoEstado":"FINAL","move":"DIREITA"}]}

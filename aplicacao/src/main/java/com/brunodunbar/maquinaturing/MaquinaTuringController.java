@@ -7,10 +7,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.SpinnerValueFactory;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
@@ -20,6 +17,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Objects;
+import java.util.Optional;
 
 public class MaquinaTuringController {
 
@@ -38,6 +36,9 @@ public class MaquinaTuringController {
     public VBox uxContent;
 
     @FXML
+    public TextArea uxSaida;
+
+    @FXML
     private Fita uxFita;
 
     @FXML
@@ -49,8 +50,11 @@ public class MaquinaTuringController {
     private ObservableList<Comando> comandos = FXCollections.observableArrayList();
     private ObservableList<Estado> estados = FXCollections.observableArrayList(Estado.INICIAL, Estado.FINAL);
     private SpinnerValueFactory.IntegerSpinnerValueFactory spinnerValueFactory;
+
     private FileChooser abrirFileChooser;
     private FileChooser salvarFileChooser;
+
+    private Estado estadoAtual = Estado.INICIAL;
 
     @FXML
     public void initialize() {
@@ -122,6 +126,27 @@ public class MaquinaTuringController {
 
     @FXML
     private void onExecutar(ActionEvent actionEvent) {
+
+        uxSaida.setText("");
+
+        while (estadoAtual != Estado.FINAL) {
+
+            String valorAtual = uxFita.le();
+            Optional<Comando> comandoOptional = comandos.stream().filter(c -> Objects.equals(c.getEstado(), estadoAtual) && Objects.equals(c.getLe(), valorAtual))
+                    .findFirst();
+
+            if (!comandoOptional.isPresent()) {
+                uxSaida.appendText("Sem comando para " + estadoAtual + ", valor " + valorAtual);
+                break;
+            }
+
+            Comando comando = comandoOptional.get();
+            uxFita.escreve(comando.getEscreve());
+            uxFita.move(comando.getMove());
+
+            estadoAtual = comando.getProximoEstado();
+        }
+
         System.out.print("onExecutar");
     }
 
@@ -260,5 +285,10 @@ public class MaquinaTuringController {
                 e.printStackTrace();
             }
         }
+    }
+
+    public void onResetar(ActionEvent actionEvent) {
+        estadoAtual = Estado.INICIAL;
+        uxFita.limpar();
     }
 }
