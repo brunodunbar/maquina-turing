@@ -2,6 +2,7 @@ package com.brunodunbar.maquinaturing;
 
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -17,7 +18,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Objects;
-import java.util.Optional;
 
 public class MaquinaTuringController {
 
@@ -46,10 +46,14 @@ public class MaquinaTuringController {
 
     @FXML
     private Spinner<Integer> uxQuantidadeEstados;
+    private SpinnerValueFactory.IntegerSpinnerValueFactory uxQuantidadeEstadosSpinnerValueFactory;
+
+    @FXML
+    private Spinner<Integer> uxIntervaloComandos;
+    private SpinnerValueFactory.IntegerSpinnerValueFactory uxIntervaloComandosSpinnerValueFactory;
 
     private ObservableList<Comando> comandos = FXCollections.observableArrayList();
     private ObservableList<Estado> estados = FXCollections.observableArrayList(Estado.INICIAL, Estado.FINAL);
-    private SpinnerValueFactory.IntegerSpinnerValueFactory spinnerValueFactory;
 
     private FileChooser abrirFileChooser;
     private FileChooser salvarFileChooser;
@@ -85,11 +89,14 @@ public class MaquinaTuringController {
         uxComandosProximoEstado.setCellFactory(param -> new ComboBoxTableCell(Estado.stringConverter(), estados));
         uxComandosMove.setCellFactory(param -> new ComboBoxTableCell(Direcao.stringConverter(), Direcao.values()));
 
-        spinnerValueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(10, 1000, 10);
-        uxQuantidadeEstados.setValueFactory(spinnerValueFactory);
+        uxQuantidadeEstadosSpinnerValueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(10, 1000, 10);
+        uxQuantidadeEstados.setValueFactory(uxQuantidadeEstadosSpinnerValueFactory);
         uxQuantidadeEstados.valueProperty().addListener(observable -> {
             updateEstados();
         });
+
+        uxIntervaloComandosSpinnerValueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 10000, 500, 100);
+        uxIntervaloComandos.setValueFactory(uxIntervaloComandosSpinnerValueFactory);
 
         updateEstados();
     }
@@ -126,28 +133,40 @@ public class MaquinaTuringController {
 
     @FXML
     private void onExecutar(ActionEvent actionEvent) {
-
         uxSaida.setText("");
 
-        while (estadoAtual != Estado.FINAL) {
+        Thread thread = new Thread(() -> {
+            while (estadoAtual != Estado.FINAL) {
+                Platform.runLater(() -> {
+                    try {
+                        String valorAtual = uxFita.le();
 
-            String valorAtual = uxFita.le();
-            Optional<Comando> comandoOptional = comandos.stream().filter(c -> Objects.equals(c.getEstado(), estadoAtual) && Objects.equals(c.getLe(), valorAtual))
-                    .findFirst();
+                        Comando comando = comandos.stream()
+                                .filter(c -> Objects.equals(c.getEstado(), estadoAtual) && Objects.equals(c.getLe(), valorAtual))
+                                .findFirst()
+                                .orElseThrow(() -> new IllegalStateException("Sem comando para '" + estadoAtual + "', valor '" + valorAtual));
 
-            if (!comandoOptional.isPresent()) {
-                uxSaida.appendText("Sem comando para '" + estadoAtual + "', valor '" + valorAtual + "'\n");
-                break;
+                        uxComandos.getSelectionModel().select(comando);
+                        uxComandos.scrollTo(comando);
+
+                        uxFita.escreve(comando.getEscreve());
+                        uxFita.move(comando.getMove());
+
+                        estadoAtual = comando.getProximoEstado();
+                    } catch (Exception e) {
+                        uxSaida.appendText(e.getMessage() + "'\n");
+                        estadoAtual = Estado.FINAL;
+                    }
+                });
+
+                try {
+                    Thread.sleep(uxIntervaloComandosSpinnerValueFactory.getValue());
+                } catch (InterruptedException ignored) {
+                }
             }
-
-            Comando comando = comandoOptional.get();
-            uxFita.escreve(comando.getEscreve());
-            uxFita.move(comando.getMove());
-
-            estadoAtual = comando.getProximoEstado();
-        }
-
-        System.out.print("onExecutar");
+        });
+        thread.setDaemon(true);
+        thread.start();
     }
 
     @FXML
@@ -233,7 +252,7 @@ public class MaquinaTuringController {
 
                     switch (reader.nextName()) {
                         case "quantidadeEstados":
-                            spinnerValueFactory.setValue(reader.nextInt());
+                            uxQuantidadeEstadosSpinnerValueFactory.setValue(reader.nextInt());
                             updateEstados();
                             break;
                         case "comandos":
@@ -296,7 +315,7 @@ public class MaquinaTuringController {
         estadoAtual = Estado.INICIAL;
         comandos.clear();
 
-        spinnerValueFactory.setValue(10);
+        uxQuantidadeEstadosSpinnerValueFactory.setValue(10);
         updateEstados();
 
         uxFita.limpar();

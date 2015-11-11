@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/maquina-turing.iml" filepath="$PROJECT_DIR$/maquina-turing.iml" />
-      <module fileurl="file://$PROJECT_DIR$/aplicacao/maquina-turing-aplicacao.iml" filepath="$PROJECT_DIR$/aplicacao/maquina-turing-aplicacao.iml" />
     </modules>
   </component>
 </project>

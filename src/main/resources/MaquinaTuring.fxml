@@ -102,7 +102,9 @@
                     </rowConstraints>
                     <children>
                         <Label text="Quantidade de estados:" GridPane.halignment="RIGHT"/>
-                        <Spinner fx:id="uxQuantidadeEstados" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                        <Spinner fx:id="uxQuantidadeEstados" GridPane.columnIndex="1"/>
+                        <Label text="Intervalo comandos:" GridPane.rowIndex="1" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="uxIntervaloComandos" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
                     </children>
                 </GridPane>
             </children>

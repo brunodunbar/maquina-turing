@@ -22,13 +22,19 @@
         <sourceTestOutputDir name="target\generated-test-sources\test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
-        <module name="maquina-turing-aplicacao" />
       </profile>
       <profile default="false" name="Annotation profile for maquina-turing-componentes" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target\generated-test-sources\test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
+      </profile>
+      <profile default="false" name="Annotation profile for maquina-turing" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target\generated-test-sources\test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="maquina-turing" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>

@@ -15,6 +15,7 @@ public class Fita extends ScrollPane {
     private Celula celulaSelecionada;
 
     private int posicao = 0;
+    private final HBox celulaContainer;
 
     public Fita() {
 
@@ -24,14 +25,15 @@ public class Fita extends ScrollPane {
         setMaxHeight(Control.USE_PREF_SIZE);
         setFitToHeight(true);
 
-        HBox hbox = new HBox();
-        hbox.setPadding(new Insets(3, 3, 3, 3));
+        celulaContainer = new HBox();
+        celulaContainer.setPadding(new Insets(3, 3, 3, 3));
+        setContent(celulaContainer);
 
         celulas = new ArrayList<>();
         for (int i = 0; i < 50; i++) {
             Celula celula = new Celula();
             celulas.add(celula);
-            hbox.getChildren().add(celula);
+            celulaContainer.getChildren().add(celula);
         }
 
         Celula primeiraCelula = celulas.get(0);
@@ -40,8 +42,6 @@ public class Fita extends ScrollPane {
         primeiraCelula.setValor(">");
 
         selecionarCelula(primeiraCelula);
-
-        setContent(hbox);
     }
 
     private void selecionarCelula(Celula celula) {
@@ -52,11 +52,15 @@ public class Fita extends ScrollPane {
 
         celulaSelecionada = celula;
         celulaSelecionada.setSelecionada(true);
+
+        double h = getContent().getBoundsInLocal().getWidth();
+        double y = (celulaSelecionada.getBoundsInParent().getMaxX() + celulaSelecionada.getBoundsInParent().getMinX()) / 2.0;
+        double v = getViewportBounds().getWidth();
+        setHvalue(getHmax() * ((y - 0.5 * v) / (h - v)));
     }
 
     public void move(Direcao direcao) {
         int novaPosicao = direcao == Direcao.DIREITA ? posicao + 1 : posicao - 1;
-
         if (novaPosicao < 0 || novaPosicao >= celulas.size()) {
             throw new IllegalStateException("Movimento inválido da cabeça de leitura para a posição " + novaPosicao);
         }
